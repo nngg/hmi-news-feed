@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            width: 400px; 
+            height: 480px; 
+            margin: 0; 
+            padding: 15px; 
+            font-family: 'Assistant', sans-serif; 
+            background: #ffffff; 
+            overflow: hidden; 
+        }
+        .rss-item { 
+            border-bottom: 1px solid #ddd; 
+            padding: 10px 0; 
+        }
+        .rss-title { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #1a1a1a; 
+            line-height: 1.3;
+        }
+        a { text-decoration: none; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div id="rss-feed">טוען חדשות...</div>
+
+    <script>
+        const RSS_URL = `https://corsproxy.io/?https://www.ynet.co.il/Integration/StoryRss2.xml`;
+
+        function fetchFeed() {
+            fetch(RSS_URL)
+                .then(response => response.text())
+                .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+                .then(data => {
+                    const items = data.querySelectorAll("item");
+                    let html = '';
+                    for(let i = 0; i < 5 && i < items.length; i++) {
+                        const title = items[i].querySelector("title").textContent;
+                        const link = items[i].querySelector("link").textContent;
+                        html += `
+                            <div class="rss-item">
+                                <div class="rss-title">
+                                    <a href="${link}" target="_blank">${title}</a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    document.getElementById('rss-feed').innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById('rss-feed').innerHTML = "שגיאה בטעינת הפיד";
+                });
+        }
+
+        // Initial call and refresh every 15 minutes (900,000ms)
+        fetchFeed();
+        setInterval(fetchFeed, 900000);
+    </script>
+</body>
+</html>
